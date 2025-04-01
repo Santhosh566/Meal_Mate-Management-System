@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ratings for {{ food_item.name }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* ... Add your styles ... */
+        .rating-card {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .stars {
+            color: #ffd700;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Ratings for {{ food_item.name }}</h1>
+        <div class="summary">
+            <p>Average Rating: {{ food_item.rating|floatformat:1 }} / 5</p>
+            <p>Total Ratings: {{ food_item.rating_count }}</p>
+        </div>
+        
+        <div class="ratings-list">
+            {% for rating in ratings %}
+            <div class="rating-card">
+                <div class="stars">
+                    {% for i in "12345" %}
+                        <i class="fas fa-star {% if forloop.counter <= rating.rating %}active{% endif %}"></i>
+                    {% endfor %}
+                </div>
+                <p class="review">{{ rating.review|default:"No review provided" }}</p>
+                <p class="meta">By: {{ rating.customer.username }} on {{ rating.created_at|date:"F d, Y" }}</p>
+            </div>
+            {% empty %}
+            <p>No ratings yet</p>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html> 

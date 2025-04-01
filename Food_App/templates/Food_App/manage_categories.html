@@ -1,0 +1,230 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Categories - Food Court</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+        }
+        .container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .back-btn {
+            color: #ff6b6b;
+            text-decoration: none;
+        }
+        .category-form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .submit-btn {
+            background: #ff6b6b;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .categories-list {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .action-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        .edit-btn {
+            background: #ffd43b;
+            color: black;
+        }
+        .delete-btn {
+            background: #ff6b6b;
+            color: white;
+        }
+        .edit-form {
+            display: none;
+            margin-top: 10px;
+        }
+        .edit-form input {
+            width: calc(100% - 120px);
+            margin-right: 10px;
+        }
+        .edit-form button {
+            width: 100px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 500px;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Manage Categories</h1>
+            <a href="{% url 'admin_home' %}" class="back-btn">Back to Dashboard</a>
+        </div>
+
+        <div class="category-form">
+            <h2>Add New Category</h2>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="category_name">Category Name</label>
+                    <input type="text" id="category_name" name="category_name" required>
+                </div>
+                <button type="submit" class="submit-btn">Add Category</button>
+            </form>
+        </div>
+
+        <div class="categories-list">
+            <h2>Existing Categories</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Category Name</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category in categories %}
+                    <tr>
+                        <td>
+                            <span class="category-name">{{ category.name }}</span>
+                            <form class="edit-form" id="edit-form-{{ category.id }}" method="post" action="{% url 'edit_category' category.id %}">
+                                {% csrf_token %}
+                                <input type="text" name="category_name" value="{{ category.name }}" required>
+                                <button type="submit" class="action-btn edit-btn">Save</button>
+                            </form>
+                        </td>
+                        <td>
+                            <button class="action-btn edit-btn" onclick="showEditForm({{ category.id }})">Edit</button>
+                            <button class="action-btn delete-btn" onclick="confirmDelete({{ category.id }}, '{{ category.name }}')">Delete</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <h3>Confirm Delete</h3>
+            <p id="deleteMessage"></p>
+            <div class="modal-buttons">
+                <button onclick="closeModal()" class="action-btn edit-btn">Cancel</button>
+                <form id="deleteForm" method="post" action="" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="action-btn delete-btn">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showEditForm(categoryId) {
+            // Hide all edit forms first
+            document.querySelectorAll('.edit-form').forEach(form => {
+                form.style.display = 'none';
+            });
+            
+            // Show the selected category's edit form
+            const form = document.getElementById(`edit-form-${categoryId}`);
+            form.style.display = 'flex';
+            form.querySelector('input').focus();
+        }
+
+        function confirmDelete(categoryId, categoryName) {
+            const modal = document.getElementById('deleteModal');
+            const message = document.getElementById('deleteMessage');
+            const form = document.getElementById('deleteForm');
+            
+            message.textContent = `Are you sure you want to delete "${categoryName}"?`;
+            form.action = `{% url 'delete_category' 0 %}`.replace('0', categoryId);
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('deleteModal');
+            modal.style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('deleteModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>

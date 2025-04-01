@@ -1,0 +1,93 @@
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <div class="feedback-form-container">
+        <h2>Submit Your Feedback</h2>
+        <div class="order-info">
+            <p>Order #{{ order.id }}</p>
+            <p>Date: {{ order.created_at|date:"F d, Y" }}</p>
+        </div>
+
+        <!-- Show ordered items -->
+        <div class="order-items">
+            <h3>Order Items:</h3>
+            <ul class="items-list">
+                {% for item in order_items %}
+                <li>
+                    <span class="item-name">{{ item.food_item.name }}</span>
+                    <span class="item-quantity">x{{ item.quantity }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <form method="POST" class="feedback-form">
+            {% csrf_token %}
+            
+            <!-- Rating Stars -->
+            <div class="rating-container">
+                <label>Rate your experience:</label>
+                <div class="star-rating">
+                    <input type="radio" name="rating" value="5" id="star5" required>
+                    <label for="star5">★</label>
+                    <input type="radio" name="rating" value="4" id="star4">
+                    <label for="star4">★</label>
+                    <input type="radio" name="rating" value="3" id="star3">
+                    <label for="star3">★</label>
+                    <input type="radio" name="rating" value="2" id="star2">
+                    <label for="star2">★</label>
+                    <input type="radio" name="rating" value="1" id="star1">
+                    <label for="star1">★</label>
+                </div>
+            </div>
+
+            <!-- Comment -->
+            <div class="comment-container">
+                <label for="comment">Your Comments:</label>
+                <textarea name="comment" id="comment" rows="4" required 
+                          placeholder="Tell us about your experience..."></textarea>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="submit-btn">Submit Feedback</button>
+        </form>
+    </div>
+</div>
+
+<style>
+/* ... existing styles ... */
+
+.order-items {
+    margin: 20px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.items-list {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0;
+}
+
+.items-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.items-list li:last-child {
+    border-bottom: none;
+}
+
+.item-name {
+    font-weight: 500;
+}
+
+.item-quantity {
+    color: #666;
+}
+</style>
+{% endblock %}

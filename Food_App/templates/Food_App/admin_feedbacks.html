@@ -1,0 +1,113 @@
+{% extends 'Food_App/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <h2>Customer Feedbacks</h2>
+    
+    <div class="feedback-filters">
+        <select id="ratingFilter" onchange="filterFeedbacks()">
+            <option value="all">All Ratings</option>
+            <option value="5">5 Stars</option>
+            <option value="4">4 Stars</option>
+            <option value="3">3 Stars</option>
+            <option value="2">2 Stars</option>
+            <option value="1">1 Star</option>
+        </select>
+    </div>
+    
+    <div class="feedback-list">
+        {% for feedback in feedbacks %}
+        <div class="feedback-card" data-rating="{{ feedback.rating }}">
+            <div class="feedback-header">
+                <div class="user-info">
+                    <h3>{{ feedback.user.username }}</h3>
+                    <span class="order-number">Order #{{ feedback.order.id }}</span>
+                </div>
+                <div class="rating">
+                    {% for i in "12345" %}
+                    <span class="star {% if forloop.counter <= feedback.rating %}filled{% endif %}">★</span>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="feedback-content">
+                <h4>{{ feedback.food_item.name }}</h4>
+                <p>{{ feedback.comment }}</p>
+            </div>
+            <div class="feedback-meta">
+                <span>{{ feedback.created_at|date:"F d, Y" }}</span>
+                <span>{{ feedback.food_item.category.name }}</span>
+            </div>
+        </div>
+        {% empty %}
+        <div class="no-feedback">
+            <p>No feedback available yet.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+.feedback-filters {
+    margin: 20px 0;
+}
+
+.feedback-filters select {
+    padding: 8px 15px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.feedback-card {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.order-number {
+    color: #666;
+    font-size: 14px;
+}
+
+.star {
+    color: #ddd;
+    font-size: 20px;
+}
+
+.star.filled {
+    color: #ffd700;
+}
+
+.feedback-meta {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    color: #666;
+}
+</style>
+
+<script>
+function filterFeedbacks() {
+    const rating = document.getElementById('ratingFilter').value;
+    const cards = document.querySelectorAll('.feedback-card');
+    
+    cards.forEach(card => {
+        if (rating === 'all' || card.dataset.rating === rating) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+</script>
+{% endblock %} 

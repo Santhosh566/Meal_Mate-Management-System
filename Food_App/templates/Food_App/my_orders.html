@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - Food Court</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background: #ff6b6b;
+            padding: 15px;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .navbar-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            transition: opacity 0.3s;
+        }
+
+        .nav-links a:hover {
+            opacity: 0.8;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h1, h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+        }
+
+        .table th,
+        .table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            color: #333;
+            text-transform: uppercase;
+            font-size: 0.9em;
+        }
+
+        .table tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .table td {
+            color: #666;
+        }
+
+        /* Status styles */
+        .status-pending {
+            color: #ffc107;
+            font-weight: bold;
+        }
+
+        .status-confirmed {
+            color: #17a2b8;
+            font-weight: bold;
+        }
+
+        .status-completed {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .status-cancelled {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        /* Order ID style */
+        .table td:first-child {
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+
+        /* Price style */
+        .table td:nth-child(4) {
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        /* Empty state */
+        p {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.1em;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                margin: 10px;
+            }
+
+            .table th,
+            .table td {
+                padding: 10px;
+                font-size: 0.9em;
+            }
+
+            .navbar-content {
+                padding: 0 15px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .navbar-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .nav-links {
+                margin-top: 10px;
+            }
+
+            .nav-links a {
+                margin: 0 10px;
+            }
+
+            .table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            .table th,
+            .table td {
+                white-space: nowrap;
+                font-size: 0.85em;
+            }
+
+            h2 {
+                text-align: center;
+            }
+        }
+
+        /* Additional Styling */
+        .date-column {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .quantity-column {
+            text-align: center;
+        }
+
+        /* Status Badge Style */
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-badge.pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-badge.confirmed {
+            background-color: #cce5ff;
+            color: #004085;
+        }
+
+        .status-badge.completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.cancelled {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Animation for hover */
+        .table tr {
+            transition: background-color 0.3s ease;
+        }
+
+        /* Scrollbar styling */
+        .container::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .container::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .container::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>My Orders</h2>
+        
+        {% if orders %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Items</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>#{{ order.id }}</td>
+                        <td>{{ order.food_item.name }}</td>
+                        <td>{{ order.quantity }}</td>
+                        <td>${{ order.total_price }}</td>
+                        <td>{{ order.status }}</td>
+                        <td>{{ order.created_at|date:"M d, Y" }}</td>
+                        {% if order.status == 'delivered' and not order.has_feedback %}
+                        <td>
+                            <a href="{% url 'submit_feedback' order.id %}" class="feedback-btn">
+                                Give Feedback
+                            </a>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No orders found.</p>
+        {% endif %}
+        
+        <a href="{% url 'customer_home' %}">Back to Home</a>
+    </div>
+</body>
+</html>

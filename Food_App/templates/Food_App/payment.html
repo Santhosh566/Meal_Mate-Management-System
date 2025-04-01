@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - Food Court</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .order-summary {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .payment-method {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .payment-method:hover {
+            border-color: #ff6b6b;
+            transform: translateY(-2px);
+        }
+
+        .payment-method.selected {
+            border-color: #ff6b6b;
+            background: #fff3f3;
+        }
+
+        .payment-method img {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 10px;
+        }
+
+        .payment-form {
+            display: none;
+        }
+
+        .payment-form.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background-color: #ff6b6b;
+            color: white;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background-color: #ff5252;
+            transform: translateY(-2px);
+        }
+
+        .total-amount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff6b6b;
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .payment-methods {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Payment</h2>
+
+        <div class="order-summary">
+            <h3>Order Summary</h3>
+            <p>Order #{{ order.id }}</p>
+            <div class="total-amount">
+                Total: ${{ order.total_amount }}
+            </div>
+        </div>
+
+        <div class="payment-methods">
+            <div class="payment-method" onclick="selectPaymentMethod('cash')">
+                <img src="https://img.icons8.com/color/96/000000/cash-in-hand.png"/>
+                <h3>Cash on Delivery</h3>
+            </div>
+            <div class="payment-method" onclick="selectPaymentMethod('card')">
+                <img src="https://img.icons8.com/color/96/000000/mastercard.png"/>
+                <h3>Credit/Debit Card</h3>
+            </div>
+            <div class="payment-method" onclick="selectPaymentMethod('upi')">
+                <img src="https://img.icons8.com/color/96/000000/google-pay-india.png"/>
+                <h3>UPI Payment</h3>
+            </div>
+        </div>
+
+        <!-- Cash on Delivery Form -->
+        <form id="cashForm" class="payment-form" action="{% url 'process_payment' order.id %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="payment_method" value="cash">
+            <p>Pay when your order is delivered.</p>
+            <button type="submit" class="btn">Confirm Order</button>
+        </form>
+
+        <!-- Card Payment Form -->
+        <form id="cardForm" class="payment-form" action="{% url 'process_payment' order.id %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="payment_method" value="card">
+            <div class="form-group">
+                <label>Card Number</label>
+                <input type="text" name="card_number" placeholder="1234 5678 9012 3456" required>
+            </div>
+            <div class="form-group">
+                <label>Expiry Date</label>
+                <input type="text" name="expiry" placeholder="MM/YY" required>
+            </div>
+            <div class="form-group">
+                <label>CVV</label>
+                <input type="text" name="cvv" placeholder="123" required>
+            </div>
+            <button type="submit" class="btn">Pay Now</button>
+        </form>
+
+        <!-- UPI Payment Form -->
+        <form id="upiForm" class="payment-form" action="{% url 'process_payment' order.id %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="payment_method" value="upi">
+            <div class="form-group">
+                <label>UPI ID</label>
+                <input type="text" name="upi_id" placeholder="username@upi" required>
+            </div>
+            <button type="submit" class="btn">Pay Now</button>
+        </form>
+    </div>
+
+    <script>
+        function selectPaymentMethod(method) {
+            // Hide all forms
+            document.querySelectorAll('.payment-form').forEach(form => {
+                form.style.display = 'none';
+            });
+            
+            // Remove selected class from all methods
+            document.querySelectorAll('.payment-method').forEach(method => {
+                method.classList.remove('selected');
+            });
+            
+            // Show selected form
+            document.getElementById(method + 'Form').style.display = 'block';
+            
+            // Add selected class to clicked method
+            event.currentTarget.classList.add('selected');
+        }
+    </script>
+</body>
+</html>

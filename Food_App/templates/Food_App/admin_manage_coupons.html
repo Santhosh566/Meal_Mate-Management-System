@@ -1,0 +1,159 @@
+{% load static %}
+
+{% block content %}
+<div class="coupon-dashboard">
+    <div class="dashboard-header">
+        <h2>Manage Coupons</h2>
+        <button class="add-coupon-btn" onclick="showAddCouponForm()">
+            <i class="fas fa-plus"></i> Add New Coupon
+        </button>
+    </div>
+
+    <div class="coupon-list">
+        {% for coupon in coupons %}
+        <div class="coupon-card">
+            <div class="coupon-header">
+                <h3>{{ coupon.code }}</h3>
+                <span class="status {% if coupon.is_valid %}active{% else %}inactive{% endif %}">
+                    {{ coupon.is_valid|yesno:"Active,Inactive" }}
+                </span>
+            </div>
+            <div class="coupon-details">
+                <p><strong>Discount:</strong> {{ coupon.discount_percentage }}%</p>
+                <p><strong>Min Amount:</strong> ${{ coupon.minimum_amount }}</p>
+                <p><strong>Valid From:</strong> {{ coupon.valid_from|date:"M d, Y" }}</p>
+                <p><strong>Valid To:</strong> {{ coupon.valid_to|date:"M d, Y" }}</p>
+                <p><strong>Uses:</strong> {{ coupon.times_used }}/{{ coupon.max_uses|default:"∞" }}</p>
+            </div>
+            <div class="coupon-actions">
+                <button onclick="editCoupon('{{ coupon.id }}')" class="edit-btn">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <button onclick="deleteCoupon('{{ coupon.id }}')" class="delete-btn">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+        {% empty %}
+        <div class="no-coupons">
+            <i class="fas fa-ticket-alt"></i>
+            <p>No coupons available</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+.coupon-dashboard {
+    padding: 20px;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.add-coupon-btn {
+    padding: 10px 20px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.coupon-card {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.coupon-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.status {
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 14px;
+}
+
+.status.active {
+    background: #e8f5e9;
+    color: #4CAF50;
+}
+
+.status.inactive {
+    background: #ffebee;
+    color: #f44336;
+}
+
+.coupon-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.coupon-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.edit-btn, .delete-btn {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.edit-btn {
+    background: #2196F3;
+    color: white;
+}
+
+.delete-btn {
+    background: #f44336;
+    color: white;
+}
+
+.no-coupons {
+    text-align: center;
+    padding: 50px;
+    color: #666;
+}
+
+.no-coupons i {
+    font-size: 48px;
+    margin-bottom: 15px;
+    color: #ddd;
+}
+</style>
+
+<script>
+function showAddCouponForm() {
+    // Implement add coupon form
+}
+
+function editCoupon(id) {
+    // Implement edit functionality
+}
+
+function deleteCoupon(id) {
+    // Implement delete functionality
+}
+</script>
+{% endblock %}

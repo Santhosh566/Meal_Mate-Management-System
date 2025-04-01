@@ -1,0 +1,372 @@
+{% load static %}
+
+{% block content %}
+<div class="feedback-dashboard">
+    <!-- Header Section -->
+    <div class="dashboard-header">
+        <h2>Customer Feedback Dashboard</h2>
+        <div class="header-actions">
+            <button onclick="printReport()" class="action-btn">
+                <i class="fas fa-print"></i> Print Report
+            </button>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-container">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-comments"></i>
+            </div>
+            <div class="stat-info">
+                <h3>Total Feedbacks</h3>
+                <p>{{ total_feedbacks }}</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-star"></i>
+            </div>
+            <div class="stat-info">
+                <h3>Average Rating</h3>
+                <p>{{ avg_rating }} / 5</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="filters-section">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search feedbacks...">
+            <i class="fas fa-search"></i>
+        </div>
+        <div class="filter-options">
+            <select id="ratingFilter" onchange="filterFeedbacks()">
+                <option value="all">All Ratings</option>
+                <option value="5">5 Stars</option>
+                <option value="4">4 Stars</option>
+                <option value="3">3 Stars</option>
+                <option value="2">2 Stars</option>
+                <option value="1">1 Star</option>
+            </select>
+            <select id="dateFilter">
+                <option value="all">All Time</option>
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Feedback List -->
+    <div class="feedback-list">
+        {% for feedback in feedbacks %}
+        <div class="feedback-card" data-rating="{{ feedback.rating }}">
+            <div class="feedback-header">
+                <div class="user-info">
+                    <img src="{% static 'images/user-avatar.png' %}" alt="User" class="user-avatar">
+                    <div class="user-details">
+                        <h4>{{ feedback.user.username }}</h4>
+                        <span class="order-number">Order #{{ feedback.order.id }}</span>
+                    </div>
+                </div>
+                <div class="rating-date">
+                    <div class="stars">
+                        {% for i in "12345" %}
+                        <span class="star {% if forloop.counter <= feedback.rating %}filled{% endif %}">★</span>
+                        {% endfor %}
+                    </div>
+                    <span class="date">{{ feedback.created_at|date:"F d, Y" }}</span>
+                </div>
+            </div>
+            <div class="feedback-content">
+                <div class="food-item-info">
+                    <img src="{{ feedback.food_item.image.url }}" alt="Food" class="food-image">
+                    <div class="food-details">
+                        <h5>{{ feedback.food_item.name }}</h5>
+                        <span class="category">{{ feedback.food_item.category.name }}</span>
+                    </div>
+                </div>
+                <p class="comment">{{ feedback.comment }}</p>
+            </div>
+        </div>
+        {% empty %}
+        <div class="no-feedback">
+            <i class="fas fa-inbox"></i>
+            <p>No feedback available yet</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+.feedback-dashboard {
+    padding: 30px;
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.action-btn {
+    padding: 10px 20px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    background: #e3f2fd;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1976d2;
+    font-size: 24px;
+}
+
+.stat-info h3 {
+    color: #666;
+    margin-bottom: 5px;
+    font-size: 16px;
+}
+
+.stat-info p {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin: 0;
+}
+
+.filters-section {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.search-box {
+    flex: 1;
+    min-width: 300px;
+    position: relative;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 12px 40px 12px 20px;
+    border: 1px solid #ddd;
+    border-radius: 25px;
+    font-size: 14px;
+}
+
+.search-box i {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+}
+
+.filter-options {
+    display: flex;
+    gap: 15px;
+}
+
+.filter-options select {
+    padding: 10px 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background: white;
+    min-width: 150px;
+}
+
+.feedback-card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.feedback-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-details h4 {
+    margin: 0;
+    color: #333;
+}
+
+.order-number {
+    font-size: 14px;
+    color: #666;
+}
+
+.rating-date {
+    text-align: right;
+}
+
+.stars {
+    margin-bottom: 5px;
+}
+
+.star {
+    color: #ddd;
+    font-size: 18px;
+}
+
+.star.filled {
+    color: #ffd700;
+}
+
+.date {
+    font-size: 14px;
+    color: #666;
+}
+
+.food-item-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.food-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.food-details h5 {
+    margin: 0 0 5px 0;
+    color: #333;
+}
+
+.category {
+    font-size: 14px;
+    color: #666;
+}
+
+.comment {
+    color: #444;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.no-feedback {
+    text-align: center;
+    padding: 50px;
+    color: #666;
+}
+
+.no-feedback i {
+    font-size: 48px;
+    margin-bottom: 15px;
+    color: #ddd;
+}
+
+@media (max-width: 768px) {
+    .feedback-dashboard {
+        padding: 15px;
+    }
+    
+    .filters-section {
+        flex-direction: column;
+    }
+    
+    .filter-options {
+        flex-direction: column;
+    }
+    
+    .feedback-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .rating-date {
+        text-align: left;
+    }
+}
+</style>
+
+<script>
+function filterFeedbacks() {
+    const rating = document.getElementById('ratingFilter').value;
+    const cards = document.querySelectorAll('.feedback-card');
+    
+    cards.forEach(card => {
+        if (rating === 'all' || card.dataset.rating === rating) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+function printReport() {
+    window.print();
+}
+
+// Search functionality
+document.getElementById('searchInput').addEventListener('keyup', function(e) {
+    const searchText = e.target.value.toLowerCase();
+    const cards = document.querySelectorAll('.feedback-card');
+    
+    cards.forEach(card => {
+        const content = card.textContent.toLowerCase();
+        if (content.includes(searchText)) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+});
+</script>
+{% endblock %} 
